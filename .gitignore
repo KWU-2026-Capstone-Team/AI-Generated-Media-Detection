@@ -215,3 +215,10 @@ weights/
 *.pt
 *.ckpt
 *.onnx
+
+# weights/models
+weights/
+*.pth
+*.pt
+*.ckpt
+*.onnx
