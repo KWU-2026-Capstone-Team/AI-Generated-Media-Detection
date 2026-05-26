@@ -10,3 +10,8 @@ data set link : https://www.kaggle.com/datasets/tristanzhang32/ai-generated-imag
   - `EfficientNet-B2` embeddings
   - strict 5-fold no-leakage mixed-ensemble evaluation
   - best tested setting: `Top-3 (O_S, R_S, S_SR)`
+- `experiments/ffpp_dual_branch_strict`
+  - FF++ dual-branch experiment
+  - full-frame `DINOv2` + face `ArcFace`
+  - strict 5-fold no-leakage ensemble evaluation
+  - best tested setting: `fullORSR_faceAll6`
