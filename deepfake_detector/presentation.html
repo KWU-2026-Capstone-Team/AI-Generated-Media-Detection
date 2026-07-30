@@ -178,6 +178,14 @@
     .metrics,.inv,.contrib,.lessons{grid-template-columns:1fr}
     section{padding:48px 0}
   }
+  .arch{width:100%;height:auto;font-family:var(--fm)}
+  .arch .bx{fill:var(--surface);stroke:var(--line-2);stroke-width:1.5}
+  .arch .bx.sp{stroke:var(--accent)} .arch .bx.tp{stroke:var(--solved)}
+  .arch .bx.vd{fill:var(--sunken);stroke:var(--ink-2)}
+  .arch .t{text-anchor:middle;fill:var(--ink)} .arch .t.mu{fill:var(--muted)}
+  .arch .ar{stroke:var(--line-2);stroke-width:2;fill:none} .arch .ahf{fill:var(--line-2)}
+  .arch .cap{text-anchor:middle;font-size:11px}
+  .arch .cap.sp2{fill:var(--accent)} .arch .cap.tp2{fill:var(--solved)}
 </style>
 
 <div class="wrap">
@@ -351,6 +359,20 @@
   </section>
 
   <!-- CONTRIBUTION -->
+  <section class="reveal">
+    <div class="col">
+      <div class="eyebrow">아키텍처 — 한눈에</div>
+      <h2 class="big">공간과 시간, 두 축을 <span class="hl">한 무대</span>에</h2>
+      <p class="section-lead lead">영상 → 얼굴 검출 → 두 브랜치가 서로 다른 축(외형·동역학)을 보고, 평균 융합 + 단일브랜치 고신뢰 규칙으로 판정한다.</p>
+      <div style="margin:18px 0;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px">
+      <svg viewBox="0 0 900 400" class="arch" role="img" aria-label="이중브랜치 아키텍처">
+<defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+<path d="M0,0 L7,3.2 L0,6.4 Z" class="ahf"/></marker></defs>
+<rect class="bx neu" x="8" y="172" width="90" height="56" rx="10"/><text class="t tk" x="53.0" y="195.5" font-size="13" font-weight="700">영상</text><text class="t mu" x="53.0" y="212.5" font-size="11" font-weight="400">mp4·mov</text><rect class="bx neu" x="120" y="172" width="108" height="56" rx="10"/><text class="t tk" x="174.0" y="195.5" font-size="13" font-weight="700">MTCNN</text><text class="t mu" x="174.0" y="212.5" font-size="11" font-weight="400">얼굴 검출·정렬</text><rect class="bx sp" x="256" y="66" width="300" height="94" rx="10"/><text class="t tk" x="406.0" y="100.0" font-size="13" font-weight="700">공간 브랜치</text><text class="t mu" x="406.0" y="117.0" font-size="11" font-weight="400">ConvNeXt-tiny · 전체얼굴 224²</text><text class="t mu" x="406.0" y="134.0" font-size="11" font-weight="400">5-fold 앙상블 → p_spatial</text><rect class="bx tp" x="256" y="240" width="300" height="94" rx="10"/><text class="t tk" x="406.0" y="274.0" font-size="13" font-weight="700">시간 브랜치</text><text class="t mu" x="406.0" y="291.0" font-size="11" font-weight="400">mc3_18 3D-CNN · 입 112²×16f</text><text class="t mu" x="406.0" y="308.0" font-size="11" font-weight="400">6-앙상블 + Platt보정 → p_temporal</text><rect class="bx neu" x="602" y="172" width="92" height="56" rx="10"/><text class="t tk" x="648.0" y="195.5" font-size="13" font-weight="700">mean</text><text class="t mu" x="648.0" y="212.5" font-size="11" font-weight="400">fusion</text><rect class="bx vd" x="716" y="164" width="176" height="72" rx="10"/><text class="t tk" x="804.0" y="187.0" font-size="13" font-weight="700">판정</text><text class="t mu" x="804.0" y="204.0" font-size="11" font-weight="400">p̄ ≥ 0.5  또는</text><text class="t mu" x="804.0" y="221.0" font-size="11" font-weight="400">브랜치 ≥ 0.85 → FAKE</text><path class="ar" d="M98,200 L118,200" marker-end="url(#ah)"/><path class="ar" d="M226,192 L256,120" marker-end="url(#ah)"/><path class="ar" d="M226,208 L256,282" marker-end="url(#ah)"/><path class="ar" d="M556,120 L602,188" marker-end="url(#ah)"/><path class="ar" d="M556,282 L602,212" marker-end="url(#ah)"/><path class="ar" d="M694,200 L714,200" marker-end="url(#ah)"/><text class="cap sp2" x="406" y="52">swap 계열 · 프레임 내 경계 아티팩트</text><text class="cap tp2" x="406" y="356">재연 계열 · 입 텍스처 시간 과평활  ↑ 과평활 aug(real-only) · Grad-CAM XAI</text></svg>
+      </div>
+    </div>
+  </section>
+
   <section class="reveal">
     <div class="col">
       <div class="eyebrow">확장 — 재연의 정체</div>
