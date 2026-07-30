@@ -23,8 +23,9 @@ deepfake_detector/
 ├── models/
 │   ├── spatial/          # ConvNeXt 5-fold 앙상블 (전체 얼굴)
 │   │   └── convnext_fold{1..5}.pt
-│   └── temporal/         # 3D-CNN(mc3_18) 3-fold 앙상블 (입영역 클립)
-│       └── temporal_fold{1..3}.pt
+│   └── temporal/         # 3D-CNN(mc3_18) 6모델 앙상블 (입영역 클립)
+│       ├── temporal_base_fold{1..3}.pt   # 표준 지도학습
+│       └── temporal_aug_fold{1..3}.pt    # 과평활-aug(재연 강건성 hedge)
 ├── presentation.html     # 발표·심사용 비주얼 페이지 (브라우저로 열기)
 ├── EXPERIMENT_LOG.md     # 전체 연구 여정 기록 (반증 6개 + 벤치마크 + 돌파)
 └── README.md

@@ -10,6 +10,7 @@ import torch
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 from infer import load_models, faces_from_video, predict
+import xai
 
 DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"[web] 모델 로딩중... (device={DEV.type})", flush=True)
@@ -66,6 +67,14 @@ margin:0 auto 14px;animation:sp 1s linear infinite}@keyframes sp{to{transform:ro
 .fill.sp{background:var(--accent)}.fill.tp{background:var(--solved)}
 .bv{font-family:var(--fm);font-size:13px;font-weight:700;text-align:right}
 .hint{padding:0 26px 22px;color:var(--muted);font-size:.86em}.hint b{color:var(--ink2)}
+.xai{padding:18px 26px 24px;border-top:1px solid var(--line)}
+.xtitle{font-weight:700;font-size:.95em;margin-bottom:10px}
+.xfam{font-family:var(--fm);font-size:13px;color:var(--ink2);background:var(--sunken);border-radius:10px;padding:10px 12px;margin-bottom:14px}
+.xgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.xgrid figure{margin:0}
+.xgrid img{width:100%;border-radius:12px;display:block;background:var(--sunken)}
+.xgrid figcaption{font-family:var(--fm);font-size:11.5px;color:var(--muted);text-align:center;margin-top:6px}
+.xnote{font-family:var(--fm);font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6}
 .err{display:none;background:var(--wall-soft);color:var(--wall);border:1px solid var(--wall);border-radius:12px;
 padding:16px;font-family:var(--fm);font-size:13px;margin-top:20px}
 .foot{margin-top:34px;font-family:var(--fm);font-size:11.5px;color:var(--muted);text-align:center;line-height:1.7}
@@ -93,6 +102,15 @@ padding:16px;font-family:var(--fm);font-size:13px;margin-top:20px}
       <div class="brow"><span class="bl">시공간 (동역학)</span><div class="track"><div class="fill tp" id="tpf"></div></div><span class="bv" id="tpv"></span></div>
     </div>
     <div class="hint" id="hint"></div>
+    <div class="xai" id="xai" style="display:none">
+      <div class="xtitle">🔍 왜 그렇게 판단했나 (XAI)</div>
+      <div class="xfam" id="xfam"></div>
+      <div class="xgrid">
+        <figure><img id="xsp" alt="공간 히트맵"><figcaption>공간 — 얼굴 외형 주목영역</figcaption></figure>
+        <figure><img id="xtp" alt="시공간 히트맵"><figcaption>시공간 — 입영역 시간 주목</figcaption></figure>
+      </div>
+      <div class="xnote" id="xnote"></div>
+    </div>
   </div>
 </div>
 <div class="foot">누수0 in-dist AUC 0.940 · FF++ 4기법 전부 ≥0.89<br>공간=ConvNeXt 전체얼굴 · 시공간=3D-CNN 입영역 클립</div>
@@ -133,6 +151,14 @@ function render(d){
     else h='두 브랜치가 함께 fake 신호를 냄.';
   }else h='두 브랜치 모두 낮음 → real로 판정.';
   document.getElementById('hint').innerHTML=h;
+  const xai=document.getElementById('xai');
+  if(d.cam_spatial||d.cam_temporal){
+    if(d.cam_spatial)document.getElementById('xsp').src=d.cam_spatial;
+    if(d.cam_temporal)document.getElementById('xtp').src=d.cam_temporal;
+    document.getElementById('xfam').textContent='🧭 '+(d.family||'');
+    document.getElementById('xnote').textContent=d.faithfulness||'';
+    xai.style.display='block';
+  }else xai.style.display='none';
   res.style.display='block';
 }
 </script></body></html>"""
@@ -155,10 +181,12 @@ def application(environ, start_response):
             else:
                 with LOCK:
                     sp, tp, fused = predict(faces, CONV, TEMP, DEV)
+                    xdata = xai.explain(faces, CONV, TEMP, DEV, sp, tp)   # Grad-CAM + 브랜치귀속 (backward → LOCK 내부)
                 conf = max(sp, tp); is_fake = (fused >= 0.5) or (conf >= 0.85)
                 reason = "종합 확률" if fused >= 0.5 else ("공간 브랜치" if sp >= 0.85 else "시공간 브랜치") if is_fake else "-"
                 res = {"spatial": round(sp, 3), "temporal": round(tp, 3), "fused": round(fused, 3),
                        "verdict": "FAKE" if is_fake else "REAL", "reason": reason, "n_faces": len(faces)}
+                res.update(xdata)
         except Exception as e:
             res = {"error": f"처리 오류: {e}"}
         finally:

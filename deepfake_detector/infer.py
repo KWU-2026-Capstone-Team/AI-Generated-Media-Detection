@@ -76,6 +76,18 @@ def mouth(im):
     w, h = im.size; a, b, c, d = MOUTH
     return im.crop((int(c * w), int(a * h), int(d * w), int(b * h)))
 
+_CALIB = None
+def calib_temporal(tp):
+    """temporal 점수 Platt 보정(신규 6모델 앙상블 점수이동 교정). calibration.json 없으면 원값."""
+    global _CALIB
+    if _CALIB is None:
+        import json
+        p = os.path.join(TEMPORAL_DIR, "calibration.json")
+        _CALIB = json.load(open(p)) if os.path.exists(p) else {}
+    if "a" not in _CALIB: return tp
+    q = min(max(tp, 1e-4), 1 - 1e-4)
+    return float(1.0 / (1.0 + np.exp(-(_CALIB["a"] * np.log(q / (1 - q)) + _CALIB["b"]))))
+
 # ---- 예측 ----
 def predict(faces, conv, temp, dev):
     ctf = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor(), transforms.Normalize(IMG_MEAN, IMG_STD)])
@@ -85,6 +97,7 @@ def predict(faces, conv, temp, dev):
     sel = faces[:T] if len(faces) >= T else faces + [faces[-1]] * (T - len(faces))
     clip = torch.stack([ttf(mouth(f)) for f in sel], 1).unsqueeze(0).to(dev)
     with torch.no_grad(): tp = float(np.mean([torch.sigmoid(m(clip)).item() for m in temp]))
+    tp = calib_temporal(tp)   # 신규 앙상블 점수이동 교정 (FF++ fit, calibration.json)
     return sp, tp, (sp + tp) / 2
 
 def main():
