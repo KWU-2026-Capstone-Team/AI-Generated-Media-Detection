@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 모델 가중치(.pt)는 fp16으로 저장돼 각 <100MB → git에 직접 포함 (LFS 불필요)
+
+# 임시/로그
+*.log
+tmp/

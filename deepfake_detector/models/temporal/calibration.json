@@ -1,0 +1,7 @@
+{
+  "method": "platt_on_logit",
+  "a": 0.7135575417801788,
+  "b": -0.9067264073246125,
+  "thr_star_raw": 0.9,
+  "note": "calibrated = sigmoid(a*logit(temporal_score)+b); infer.py\uac00 temporal \uc810\uc218\uc5d0 \uc801\uc6a9"
+}
